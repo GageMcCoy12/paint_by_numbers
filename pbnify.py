@@ -1,9 +1,9 @@
 import numpy as np
 import cv2
 
-import dominant_cluster
-import image_utils
-import process
+import .dominant_cluster
+import .image_utils
+import .process
 
 
 def simple_matrix_to_image(mat, palette):
