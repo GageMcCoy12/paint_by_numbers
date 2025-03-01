@@ -8,8 +8,8 @@ import cv2
 from typing import Dict, Any
 
 # Import the repository modules
-from .pbnify import PBNify
-from .image_utils import save_image_to_base64, load_image_from_base64, bar_colors
+from pbnify import PBNify
+from image_utils import save_image_to_base64, load_image_from_base64, bar_colors
 
 def main(context):
     """
@@ -27,10 +27,61 @@ def main(context):
         # Access the request body from the context
         body_str = context.req.body
         print(f"Raw body type: {type(body_str)}")
+        print(f"Raw body content: {body_str}")
         
-        # Parse the JSON string
+        # Parse the JSON string - handle Appwrite's quirky string handling
         try:
-            body_data = json.loads(body_str)
+            # Try multiple approaches to parse the body
+            body_data = None
+            
+            # Approach 1: Direct JSON parsing
+            try:
+                body_data = json.loads(body_str)
+                print("Parsed using direct JSON loading")
+            except json.JSONDecodeError:
+                pass
+                
+            # Approach 2: Handle string-encoded JSON
+            if body_data is None:
+                try:
+                    # Remove any escape characters that might be causing issues
+                    cleaned_str = body_str.replace('\\', '').replace('"{', '{').replace('}"', '}')
+                    body_data = json.loads(cleaned_str)
+                    print("Parsed using cleaned string approach")
+                except json.JSONDecodeError:
+                    pass
+            
+            # Approach 3: Try parsing as a raw string
+            if body_data is None:
+                try:
+                    # Sometimes Appwrite sends the body as a raw string without quotes
+                    body_data = {}
+                    # Extract image using regex pattern matching
+                    import re
+                    image_match = re.search(r'"image"\s*:\s*"([^"]+)"', body_str)
+                    if image_match:
+                        body_data['image'] = image_match.group(1)
+                        
+                    # Extract numColors
+                    num_colors_match = re.search(r'"numColors"\s*:\s*(\d+)', body_str)
+                    if num_colors_match:
+                        body_data['numColors'] = int(num_colors_match.group(1))
+                    
+                    # Extract includeOutline
+                    include_outline_match = re.search(r'"includeOutline"\s*:\s*(true|false)', body_str)
+                    if include_outline_match:
+                        body_data['includeOutline'] = include_outline_match.group(1).lower() == 'true'
+                        
+                    print("Parsed using regex pattern matching")
+                except Exception as e:
+                    print(f"Regex parsing failed: {str(e)}")
+                    
+            # If we still couldn't parse the body, raise an error
+            if body_data is None:
+                raise ValueError("Could not parse request body using any method")
+                
+            print(f"Parsed body data: {body_data}")
+            
             base64_image = body_data.get('image')
             num_colors = body_data.get('numColors', 15)  # Default to 15 colors if not specified
             include_outline = body_data.get('includeOutline', True)  # Whether to include outline image
