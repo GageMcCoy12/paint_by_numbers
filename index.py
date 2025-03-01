@@ -8,7 +8,7 @@ import cv2
 from typing import Dict, Any
 
 # Import the repository modules
-from . import PBNify
+from .PBNify import PBNify
 from image_utils import save_image_to_base64, load_image_from_base64, bar_colors
 
 def main(context):
