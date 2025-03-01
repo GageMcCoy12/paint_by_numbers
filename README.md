@@ -61,3 +61,53 @@ Or in case of an error:
 - opencv-python-headless
 - scikit-learn
 - Pillow 
+
+## Testing Tools
+
+This function comes with two testing tools to help you test the paint-by-numbers functionality:
+
+### run_test.py
+
+A Python script that allows you to test the function in three different modes:
+
+1. **Local Mode**: Tests the function locally using the `index.py` file directly
+2. **Console Mode**: Prepares a JSON payload for testing in the Appwrite console
+3. **API Mode**: Tests the function via the Appwrite API
+
+Usage:
+```bash
+# Interactive mode (recommended for first-time users)
+python run_test.py
+
+# Command-line mode
+python run_test.py --mode local --image test_image.jpg --colors 8
+python run_test.py --mode console --image test_image.jpg --colors 12
+python run_test.py --mode api --image test_image.jpg --colors 10 --project-id YOUR_PROJECT_ID --function-id YOUR_FUNCTION_ID --api-key YOUR_API_KEY
+```
+
+### run_all.sh
+
+A shell script that provides an interactive menu to run the test script with different options:
+
+1. Run local test
+2. Prepare console test payload
+3. Run API test
+
+Usage:
+```bash
+# Make sure the script is executable
+chmod +x run_all.sh
+
+# Run the script
+./run_all.sh
+```
+
+The script automatically:
+- Creates a virtual environment if it doesn't exist
+- Activates the virtual environment
+- Installs required packages
+- Runs the selected test mode
+
+## Deployment
+
+For deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md). 

@@ -8,5 +8,6 @@
     "timeout": 120,
     "enabled": true,
     "logging": true,
-    "vars": {}
+    "vars": {},
+    "commands": "pip install -r requirements.txt"
 } 
