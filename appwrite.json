@@ -1,0 +1,12 @@
+{
+    "name": "paint_by_numbers",
+    "runtime": "python-3.10",
+    "entrypoint": "index.py",
+    "execute": ["any"],
+    "events": [],
+    "schedule": "",
+    "timeout": 120,
+    "enabled": true,
+    "logging": true,
+    "vars": {}
+} 
