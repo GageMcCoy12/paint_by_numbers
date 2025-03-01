@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from collections import Counter
 
-import image_utils
+import .image_utils
 
 
 def get_dominant_colors(image, n_clusters=10, use_gpu=False, plot=True):
