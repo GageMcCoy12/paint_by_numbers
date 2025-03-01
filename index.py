@@ -27,66 +27,38 @@ def main(context):
         # Access the request body from the context
         body_str = context.req.body
         print(f"Raw body type: {type(body_str)}")
-        print(f"Raw body content: {body_str}")
+        print(f"Raw body content length: {len(body_str) if body_str else 0} characters")
         
-        # Parse the JSON string - handle Appwrite's quirky string handling
+        # Parse the string payload - format: base64_image|numColors|includeOutline
         try:
-            # Try multiple approaches to parse the body
-            body_data = None
-            
-            # Approach 1: Direct JSON parsing
-            try:
-                body_data = json.loads(body_str)
-                print("Parsed using direct JSON loading")
-            except json.JSONDecodeError:
-                pass
+            # Split the payload by the pipe character
+            if not body_str:
+                return context.res.json({
+                    "success": False,
+                    "message": "No data provided"
+                })
                 
-            # Approach 2: Handle string-encoded JSON
-            if body_data is None:
-                try:
-                    # Remove any escape characters that might be causing issues
-                    cleaned_str = body_str.replace('\\', '').replace('"{', '{').replace('}"', '}')
-                    body_data = json.loads(cleaned_str)
-                    print("Parsed using cleaned string approach")
-                except json.JSONDecodeError:
-                    pass
-            
-            # Approach 3: Try parsing as a raw string
-            if body_data is None:
-                try:
-                    # Sometimes Appwrite sends the body as a raw string without quotes
-                    body_data = {}
-                    # Extract image using regex pattern matching
-                    import re
-                    image_match = re.search(r'"image"\s*:\s*"([^"]+)"', body_str)
-                    if image_match:
-                        body_data['image'] = image_match.group(1)
-                        
-                    # Extract numColors
-                    num_colors_match = re.search(r'"numColors"\s*:\s*(\d+)', body_str)
-                    if num_colors_match:
-                        body_data['numColors'] = int(num_colors_match.group(1))
-                    
-                    # Extract includeOutline
-                    include_outline_match = re.search(r'"includeOutline"\s*:\s*(true|false)', body_str)
-                    if include_outline_match:
-                        body_data['includeOutline'] = include_outline_match.group(1).lower() == 'true'
-                        
-                    print("Parsed using regex pattern matching")
-                except Exception as e:
-                    print(f"Regex parsing failed: {str(e)}")
-                    
-            # If we still couldn't parse the body, raise an error
-            if body_data is None:
-                raise ValueError("Could not parse request body using any method")
+            parts = body_str.split('|')
+            if len(parts) < 1:
+                return context.res.json({
+                    "success": False,
+                    "message": "Invalid payload format"
+                })
                 
-            print(f"Parsed body data: {body_data}")
+            # Extract the parts
+            base64_image = parts[0]
             
-            base64_image = body_data.get('image')
-            num_colors = body_data.get('numColors', 15)  # Default to 15 colors if not specified
-            include_outline = body_data.get('includeOutline', True)  # Whether to include outline image
-            
-            print(f"Number of colors: {num_colors}")
+            # Get numColors (default to 15 if not provided)
+            num_colors = 15
+            if len(parts) > 1 and parts[1].isdigit():
+                num_colors = int(parts[1])
+                
+            # Get includeOutline (default to True if not provided)
+            include_outline = True
+            if len(parts) > 2:
+                include_outline = parts[2].lower() == 'true'
+                
+            print(f"Parsed payload: numColors={num_colors}, includeOutline={include_outline}")
             
             if not base64_image:
                 return context.res.json({
@@ -94,11 +66,11 @@ def main(context):
                     "message": "No image provided"
                 })
                 
-        except (json.JSONDecodeError, TypeError) as e:
-            print(f"Failed to parse body as JSON: {str(e)}")
+        except Exception as e:
+            print(f"Failed to parse payload: {str(e)}")
             return context.res.json({
                 "success": False,
-                "message": f"Failed to parse request body: {str(e)}"
+                "message": f"Failed to parse payload: {str(e)}"
             })
         
         # Process the image
