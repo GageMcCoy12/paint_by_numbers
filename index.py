@@ -9,7 +9,7 @@ from typing import Dict, Any
 
 # Import the repository modules
 from .pbnify import PBNify
-from image_utils import save_image_to_base64, load_image_from_base64, bar_colors
+from .image_utils import save_image_to_base64, load_image_from_base64, bar_colors
 
 def main(context):
     """
