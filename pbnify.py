@@ -26,7 +26,7 @@ def PBNify(image, clusters=20, pre_blur=True):
     """
     # Resize image if too large
     h, w = image.shape[:2]
-    max_dim = 1024
+    max_dim = 768
     if max(h, w) > max_dim:
         scale = max_dim / max(h, w)
         new_h, new_w = int(h * scale), int(w * scale)
